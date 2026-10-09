@@ -8,23 +8,29 @@ import { AvatarArt, BodyScanArt, DiaryArt, HeartArt, MachineArt, SparklesArt, Za
 import { AiProgramSheet } from '../components/sheets/PlannerSheets';
 import { AssistantSheet } from '../components/sheets/AssistantSheet';
 import { PaySheet, TopUpSheet } from '../components/sheets/MoneySheets';
-import { USER_NAME } from '../mocks/data';
 import { useApp } from '../state/AppState';
 
 type SheetKind = null | 'ai' | 'chat' | 'pay' | 'topup';
 
 export default function ProfilePage() {
-  const { balance, subscription } = useApp();
+  const { balance, subscription, userName } = useApp();
   const [sheet, setSheet] = useState<SheetKind>(null);
+
+  const initials = userName
+    .split(' ')
+    .filter(Boolean)
+    .slice(0, 2)
+    .map((w) => w[0]!.toUpperCase())
+    .join('');
 
   return (
     <div className="min-h-full bg-surface pb-8">
       {/* Шапка профиля */}
       <header className="flex items-center gap-3.5 px-4 pt-[max(env(safe-area-inset-top),20px)]">
-        <span className="w-[58px] h-[58px] rounded-full bg-[#E2E6E6] border-2 border-white shadow-sm grid place-items-center overflow-hidden shrink-0">
-          <AvatarArt />
+        <span className="w-[58px] h-[58px] rounded-full bg-gradient-to-br from-ink to-[#1C6B60] text-white grid place-items-center font-extrabold text-[20px] shrink-0 select-none">
+          {initials || <AvatarArt />}
         </span>
-        <h1 className="flex-1 text-[24px] font-extrabold tracking-tight min-w-0">{USER_NAME}</h1>
+        <h1 className="flex-1 text-[24px] font-extrabold tracking-tight min-w-0">{userName}</h1>
         <Link
           to="/settings"
           aria-label="Настройки"

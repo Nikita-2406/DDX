@@ -22,6 +22,9 @@ interface Settings {
 }
 
 interface AppContext {
+  /** «Имя Фамилия» — заполняется на онбординге при первом входе */
+  userName: string;
+  setUserName: (name: string) => void;
   balance: number;
   topUp: (sum: number) => void;
   subscription: Subscription;
@@ -38,7 +41,16 @@ interface AppContext {
 const Ctx = createContext<AppContext | null>(null);
 let seq = 0;
 
+const NAME_STORAGE_KEY = 'ddx-user-name';
+
 export function AppStateProvider({ children }: { children: ReactNode }) {
+  const [userName, setUserNameState] = useState<string>(() => {
+    try {
+      return localStorage.getItem(NAME_STORAGE_KEY) ?? '';
+    } catch {
+      return '';
+    }
+  });
   const [balance, setBalance] = useState(0);
   const [subscription, setSubscription] = useState<Subscription>({
     name: 'INFINITY 1МЕС',
@@ -51,6 +63,15 @@ export function AppStateProvider({ children }: { children: ReactNode }) {
   const [settings, setSettings] = useState<Settings>({ push: true, email: false, bio: true });
 
   const value: AppContext = {
+    userName,
+    setUserName: (name) => {
+      setUserNameState(name);
+      try {
+        localStorage.setItem(NAME_STORAGE_KEY, name);
+      } catch {
+        /* приватный режим — имя проживёт до перезагрузки */
+      }
+    },
     balance,
     topUp: (sum) => setBalance((b) => b + sum),
     subscription,

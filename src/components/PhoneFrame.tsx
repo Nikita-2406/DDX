@@ -1,4 +1,4 @@
-import { createContext, useEffect, useRef, useState } from 'react';
+import { createContext, useEffect, useRef, useState, type ReactNode } from 'react';
 import { Outlet, useLocation } from 'react-router-dom';
 import { BottomNav } from './BottomNav';
 
@@ -9,7 +9,7 @@ export const ModalHostContext = createContext<HTMLDivElement | null>(null);
  * Каркас приложения: на экранах ≥501px — рамка-«телефон» 390px по центру серого фона,
  * на мобильных — на весь экран. Контент скроллится, нижняя навигация приклеена к низу.
  */
-export function Shell({ nav = false }: { nav?: boolean }) {
+export function Shell({ nav = false, children }: { nav?: boolean; children?: ReactNode }) {
   const scrollRef = useRef<HTMLElement | null>(null);
   const [host, setHost] = useState<HTMLDivElement | null>(null);
   const { pathname } = useLocation();
@@ -27,7 +27,7 @@ export function Shell({ nav = false }: { nav?: boolean }) {
                      phone:shadow-[0_40px_90px_-25px_rgba(15,40,40,0.55)] phone:ring-[10px] phone:ring-[#1B1D1F]"
         >
           <main ref={scrollRef} className="flex-1 min-h-0 overflow-y-auto overscroll-contain no-scrollbar">
-            <Outlet />
+            {children ?? <Outlet />}
           </main>
           {nav && <BottomNav />}
           <div ref={setHost} className="absolute inset-0 z-40 pointer-events-none" />

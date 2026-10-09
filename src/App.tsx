@@ -1,5 +1,7 @@
 import { Route, Routes } from 'react-router-dom';
 import { Shell } from './components/PhoneFrame';
+import { useApp } from './state/AppState';
+import OnboardingPage from './pages/OnboardingPage';
 import HomePage from './pages/HomePage';
 import CalendarPage from './pages/CalendarPage';
 import TrainersPage from './pages/TrainersPage';
@@ -18,6 +20,17 @@ import ExtraPage from './pages/ExtraPage';
 import NotFoundPage from './pages/NotFoundPage';
 
 export default function App() {
+  const { userName } = useApp();
+
+  // Первый вход: пока не представится — показываем только онбординг.
+  if (!userName) {
+    return (
+      <Shell>
+        <OnboardingPage />
+      </Shell>
+    );
+  }
+
   return (
     <Routes>
       {/* Табы — с нижней навигацией */}
