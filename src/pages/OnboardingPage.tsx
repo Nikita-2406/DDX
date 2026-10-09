@@ -1,5 +1,6 @@
 import { useState } from 'react';
 import { Logo } from '../components/Logo';
+import { USER_NAME } from '../mocks/data';
 import { useApp } from '../state/AppState';
 
 /** Первый вход: спрашиваем имя и фамилию, дальше они показываются в профиле. */
@@ -54,7 +55,7 @@ export default function OnboardingPage() {
           Продолжить
         </button>
         <button
-          onClick={() => setUserName('Пётр Цапиков')}
+          onClick={() => setUserName(USER_NAME)}
           className="w-full text-gray-400 text-[14px] mt-4 py-2 active:opacity-60"
         >
           Пропустить — войти как демо-пользователь

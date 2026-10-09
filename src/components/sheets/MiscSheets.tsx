@@ -49,10 +49,15 @@ export function DaySheet({
 
 // ——— Выбор месяца (история посещений) ———
 
-const MONTH_OPTIONS: [string, 'oct' | 'sep' | 'aug'][] = [
-  ['Октябрь', 'oct'],
-  ['Сентябрь', 'sep'],
-  ['Август', 'aug'],
+const MONTH_OPTIONS: [string, number][] = [
+  ['Март', 0],
+  ['Апрель', 1],
+  ['Май', 2],
+  ['Июнь', 3],
+  ['Июль', 4],
+  ['Август', 5],
+  ['Сентябрь', 6],
+  ['Октябрь', 7],
 ];
 
 export function MonthSheet({
@@ -62,8 +67,8 @@ export function MonthSheet({
   onClose,
 }: {
   open: boolean;
-  selected: 'oct' | 'sep' | 'aug';
-  onSelect: (m: 'oct' | 'sep' | 'aug') => void;
+  selected: number;
+  onSelect: (m: number) => void;
   onClose: () => void;
 }) {
   return (

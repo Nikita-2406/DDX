@@ -140,121 +140,219 @@ export const levelOf = (v: number): string =>
 
 // ——— История посещений ———
 
+export const VISITS_MONTHS = ['мар', 'апр', 'май', 'июн', 'июл', 'авг', 'сен', 'окт'];
+
 export interface VisitRecord {
   label: string;
   club: string;
   dur: string;
 }
 
-export interface MonthStats {
-  title: string;
-  values: number[];
-  diff: number;
+/** Сводка одного месяца внутри таба. */
+export interface MonthVisits {
+  count: number;
   total: string;
   list: VisitRecord[];
 }
 
-export const VISITS_MONTHS = ['мар', 'апр', 'май', 'июн', 'июл', 'авг', 'сен', 'окт'];
+export interface TabHistory {
+  /** Значения столбцов графика, мар..окт */
+  values: number[];
+  /** Сводка по каждому месяцу, индекс = столбцу графика */
+  months: MonthVisits[];
+}
 
-// Стабильная активность: 12–15 визитов в клуб каждый месяц.
-const VISITS_CHART = [12, 14, 13, 15, 13, 12, 14, 15];
+const CLUBS = ['Коньково', 'Медведково', 'Преображенское Янтарь'];
+const MONTHS_NOM_SHORT = ['янв', 'фев', 'мар', 'апр', 'май', 'июн', 'июл', 'авг', 'сен', 'окт', 'ноя', 'дек'];
+const WORKOUT_NAMES = [
+  'Самостоятельная тренировка',
+  'Групповая · Функциональный тренинг',
+  'Групповая · Cycle',
+  'Групповая · Йога',
+];
 
-export const VISIT_TABS: Record<'visits' | 'workouts', Record<'oct' | 'sep' | 'aug', MonthStats>> = {
+/** Детерминированный ГПСЧ — моки одинаковы при каждой сборке. */
+function mulberry32(seed: number): () => number {
+  let s = seed;
+  return () => {
+    s |= 0;
+    s = (s + 0x6d2b79f5) | 0;
+    let t = Math.imul(s ^ (s >>> 15), 1 | s);
+    t = (t + Math.imul(t ^ (t >>> 7), 61 | t)) ^ t;
+    return ((t ^ (t >>> 14)) >>> 0) / 4294967296;
+  };
+}
+
+function fmtDur(min: number): string {
+  const h = Math.floor(min / 60);
+  return h === 0 ? `${min}м` : `${h}ч ${String(min % 60).padStart(2, '0')}м`;
+}
+
+function fmtTotal(min: number): string {
+  return `${Math.floor(min / 60)} ч ${String(min % 60).padStart(2, '0')} мин`;
+}
+
+function visitLabel(year: number, month0: number, day: number): string {
+  const wd = WEEKDAYS_SHORT[new Date(year, month0, day).getDay()];
+  return `${String(day).padStart(2, '0')} ${MONTHS_NOM_SHORT[month0]} ${year}, ${wd}`;
+}
+
+function generateVisits(year: number, month0: number, count: number): MonthVisits {
+  const rand = mulberry32(year * 100 + month0);
+  const daysInMonth = new Date(year, month0 + 1, 0).getDate();
+  const days = new Set<number>();
+  while (days.size < Math.min(count, daysInMonth)) days.add(1 + Math.floor(rand() * daysInMonth));
+  let totalMin = 0;
+  const list = [...days]
+    .sort((a, b) => a - b)
+    .map((d) => {
+      const min = 45 + Math.floor(rand() * 70);
+      totalMin += min;
+      return {
+        label: visitLabel(year, month0, d),
+        club: CLUBS[Math.floor(rand() * CLUBS.length)],
+        dur: fmtDur(min),
+      };
+    });
+  return { count: list.length, total: fmtTotal(totalMin), list };
+}
+
+function generateWorkouts(year: number, month0: number, count: number): MonthVisits {
+  if (count === 0) return { count: 0, total: '0 мин', list: [] };
+  const rand = mulberry32(7777 + year * 100 + month0);
+  const daysInMonth = new Date(year, month0 + 1, 0).getDate();
+  const days = new Set<number>();
+  while (days.size < Math.min(count, daysInMonth)) days.add(1 + Math.floor(rand() * daysInMonth));
+  let totalMin = 0;
+  const list = [...days]
+    .sort((a, b) => a - b)
+    .map((d) => {
+      const min = 40 + Math.floor(rand() * 26);
+      totalMin += min;
+      return {
+        label: visitLabel(year, month0, d),
+        club: WORKOUT_NAMES[Math.floor(rand() * WORKOUT_NAMES.length)],
+        dur: fmtDur(min),
+      };
+    });
+  return { count: list.length, total: fmtTotal(totalMin), list };
+}
+
+// Активность стабильная: 12–15 визитов в клуб каждый месяц.
+// Октябрь–август курируются вручную, март–июль генерируются детерминированно.
+
+const AUG_VISITS: MonthVisits = {
+  count: 12,
+  total: '13 ч 55 мин',
+  list: [
+    { label: '01 авг 2026, сб', club: 'Коньково', dur: '1ч 10м' },
+    { label: '03 авг 2026, пн', club: 'Медведково', dur: '55м' },
+    { label: '05 авг 2026, ср', club: 'Коньково', dur: '1ч 30м' },
+    { label: '08 авг 2026, сб', club: 'Преображенское Янтарь', dur: '1ч 05м' },
+    { label: '10 авг 2026, пн', club: 'Коньково', dur: '1ч 15м' },
+    { label: '12 авг 2026, ср', club: 'Медведково', dur: '50м' },
+    { label: '14 авг 2026, пт', club: 'Коньково', dur: '1ч 20м' },
+    { label: '17 авг 2026, пн', club: 'Коньково', dur: '45м' },
+    { label: '19 авг 2026, ср', club: 'Преображенское Янтарь', dur: '1ч 25м' },
+    { label: '22 авг 2026, сб', club: 'Коньково', dur: '1ч 10м' },
+    { label: '26 авг 2026, ср', club: 'Медведково', dur: '1ч' },
+    { label: '29 авг 2026, сб', club: 'Коньково', dur: '1ч 30м' },
+  ],
+};
+
+const SEP_VISITS: MonthVisits = {
+  count: 14,
+  total: '16 ч 40 мин',
+  list: [
+    { label: '01 сен 2026, вт', club: 'Коньково', dur: '1ч 15м' },
+    { label: '03 сен 2026, чт', club: 'Медведково', dur: '50м' },
+    { label: '05 сен 2026, сб', club: 'Коньково', dur: '1ч 40м' },
+    { label: '08 сен 2026, вт', club: 'Преображенское Янтарь', dur: '1ч 05м' },
+    { label: '10 сен 2026, чт', club: 'Коньково', dur: '1ч 20м' },
+    { label: '12 сен 2026, сб', club: 'Медведково', dur: '55м' },
+    { label: '15 сен 2026, вт', club: 'Коньково', dur: '1ч 30м' },
+    { label: '17 сен 2026, чт', club: 'Коньково', dur: '45м' },
+    { label: '19 сен 2026, сб', club: 'Преображенское Янтарь', dur: '1ч 25м' },
+    { label: '22 сен 2026, вт', club: 'Коньково', dur: '1ч 10м' },
+    { label: '24 сен 2026, чт', club: 'Медведково', dur: '1ч' },
+    { label: '26 сен 2026, сб', club: 'Коньково', dur: '1ч 35м' },
+    { label: '28 сен 2026, пн', club: 'Коньково', dur: '50м' },
+    { label: '30 сен 2026, ср', club: 'Коньково', dur: '1ч 20м' },
+  ],
+};
+
+const OCT_VISITS: MonthVisits = {
+  count: 15,
+  total: '18 ч 59 мин',
+  list: [
+    { label: '01 окт 2026, чт', club: 'Коньково', dur: '1ч 25м' },
+    { label: '02 окт 2026, пт', club: 'Коньково', dur: '1ч 39м' },
+    { label: '03 окт 2026, сб', club: 'Медведково', dur: '55м' },
+    { label: '05 окт 2026, пн', club: 'Преображенское Янтарь', dur: '1ч 10м' },
+    { label: '06 окт 2026, вт', club: 'Коньково', dur: '45м' },
+    { label: '08 окт 2026, чт', club: 'Медведково', dur: '1ч 05м' },
+    { label: '09 окт 2026, пт', club: 'Коньково', dur: '1ч 30м' },
+    { label: '12 окт 2026, пн', club: 'Коньково', dur: '1ч 15м' },
+    { label: '13 окт 2026, вт', club: 'Преображенское Янтарь', dur: '50м' },
+    { label: '15 окт 2026, чт', club: 'Коньково', dur: '1ч 45м' },
+    { label: '17 окт 2026, сб', club: 'Медведково', dur: '1ч 20м' },
+    { label: '20 окт 2026, пн', club: 'Коньково', dur: '1ч' },
+    { label: '22 окт 2026, чт', club: 'Коньково', dur: '1ч 35м' },
+    { label: '24 окт 2026, сб', club: 'Преображенское Янтарь', dur: '55м' },
+    { label: '27 окт 2026, вт', club: 'Коньково', dur: '1ч 50м' },
+  ],
+};
+
+const AUG_WORKOUTS: MonthVisits = {
+  count: 2,
+  total: '1 ч 55 мин',
+  list: [
+    { label: '17 авг 2026, пн', club: 'Групповая · Cycle', dur: '50м' },
+    { label: '05 авг 2026, ср', club: 'Самостоятельная тренировка', dur: '1ч 05м' },
+  ],
+};
+
+const SEP_WORKOUTS: MonthVisits = {
+  count: 1,
+  total: '52 мин',
+  list: [{ label: '21 сен 2026, пн', club: 'Самостоятельная тренировка', dur: '52м' }],
+};
+
+const OCT_WORKOUTS: MonthVisits = {
+  count: 2,
+  total: '1 ч 42 мин',
+  list: [
+    { label: '06 окт 2026, пн', club: 'Групповая · Функциональный тренинг', dur: '55м' },
+    { label: '01 окт 2026, чт', club: 'Самостоятельная тренировка', dur: '47м' },
+  ],
+};
+
+export const VISIT_TABS: Record<'visits' | 'workouts', TabHistory> = {
   visits: {
-    oct: {
-      title: '15 визитов в клубы',
-      values: VISITS_CHART,
-      diff: 1,
-      total: '18 ч 59 мин в клубе',
-      list: [
-        { label: '01 окт 2026, чт', club: 'Коньково', dur: '1ч 25м' },
-        { label: '02 окт 2026, пт', club: 'Коньково', dur: '1ч 39м' },
-        { label: '03 окт 2026, сб', club: 'Медведково', dur: '55м' },
-        { label: '05 окт 2026, пн', club: 'Преображенское Янтарь', dur: '1ч 10м' },
-        { label: '06 окт 2026, вт', club: 'Коньково', dur: '45м' },
-        { label: '08 окт 2026, чт', club: 'Медведково', dur: '1ч 05м' },
-        { label: '09 окт 2026, пт', club: 'Коньково', dur: '1ч 30м' },
-        { label: '12 окт 2026, пн', club: 'Коньково', dur: '1ч 15м' },
-        { label: '13 окт 2026, вт', club: 'Преображенское Янтарь', dur: '50м' },
-        { label: '15 окт 2026, чт', club: 'Коньково', dur: '1ч 45м' },
-        { label: '17 окт 2026, сб', club: 'Медведково', dur: '1ч 20м' },
-        { label: '20 окт 2026, пн', club: 'Коньково', dur: '1ч' },
-        { label: '22 окт 2026, чт', club: 'Коньково', dur: '1ч 35м' },
-        { label: '24 окт 2026, сб', club: 'Преображенское Янтарь', dur: '55м' },
-        { label: '27 окт 2026, вт', club: 'Коньково', dur: '1ч 50м' },
-      ],
-    },
-    sep: {
-      title: '14 визитов в клубы',
-      values: VISITS_CHART,
-      diff: 2,
-      total: '16 ч 40 мин в клубе',
-      list: [
-        { label: '01 сен 2026, вт', club: 'Коньково', dur: '1ч 15м' },
-        { label: '03 сен 2026, чт', club: 'Медведково', dur: '50м' },
-        { label: '05 сен 2026, сб', club: 'Коньково', dur: '1ч 40м' },
-        { label: '08 сен 2026, вт', club: 'Преображенское Янтарь', dur: '1ч 05м' },
-        { label: '10 сен 2026, чт', club: 'Коньково', dur: '1ч 20м' },
-        { label: '12 сен 2026, сб', club: 'Медведково', dur: '55м' },
-        { label: '15 сен 2026, вт', club: 'Коньково', dur: '1ч 30м' },
-        { label: '17 сен 2026, чт', club: 'Коньково', dur: '45м' },
-        { label: '19 сен 2026, сб', club: 'Преображенское Янтарь', dur: '1ч 25м' },
-        { label: '22 сен 2026, вт', club: 'Коньково', dur: '1ч 10м' },
-        { label: '24 сен 2026, чт', club: 'Медведково', dur: '1ч' },
-        { label: '26 сен 2026, сб', club: 'Коньково', dur: '1ч 35м' },
-        { label: '28 сен 2026, пн', club: 'Коньково', dur: '50м' },
-        { label: '30 сен 2026, ср', club: 'Коньково', dur: '1ч 20м' },
-      ],
-    },
-    aug: {
-      title: '12 визитов в клубы',
-      values: VISITS_CHART,
-      diff: -1,
-      total: '13 ч 55 мин в клубе',
-      list: [
-        { label: '01 авг 2026, сб', club: 'Коньково', dur: '1ч 10м' },
-        { label: '03 авг 2026, пн', club: 'Медведково', dur: '55м' },
-        { label: '05 авг 2026, ср', club: 'Коньково', dur: '1ч 30м' },
-        { label: '08 авг 2026, сб', club: 'Преображенское Янтарь', dur: '1ч 05м' },
-        { label: '10 авг 2026, пн', club: 'Коньково', dur: '1ч 15м' },
-        { label: '12 авг 2026, ср', club: 'Медведково', dur: '50м' },
-        { label: '14 авг 2026, пт', club: 'Коньково', dur: '1ч 20м' },
-        { label: '17 авг 2026, пн', club: 'Коньково', dur: '45м' },
-        { label: '19 авг 2026, ср', club: 'Преображенское Янтарь', dur: '1ч 25м' },
-        { label: '22 авг 2026, сб', club: 'Коньково', dur: '1ч 10м' },
-        { label: '26 авг 2026, ср', club: 'Медведково', dur: '1ч' },
-        { label: '29 авг 2026, сб', club: 'Коньково', dur: '1ч 30м' },
-      ],
-    },
+    values: [12, 14, 13, 15, 13, 12, 14, 15],
+    months: [
+      generateVisits(2026, 2, 12), // март
+      generateVisits(2026, 3, 14), // апрель
+      generateVisits(2026, 4, 13), // май
+      generateVisits(2026, 5, 15), // июнь
+      generateVisits(2026, 6, 13), // июль
+      AUG_VISITS,
+      SEP_VISITS,
+      OCT_VISITS,
+    ],
   },
   workouts: {
-    oct: {
-      title: '2 тренировки',
-      values: [1, 2, 2, 0, 3, 2, 1, 2],
-      diff: 1,
-      total: '1 ч 42 мин тренировок',
-      list: [
-        { label: '06 окт 2026, пн', club: 'Групповая · Функциональный тренинг', dur: '55м' },
-        { label: '01 окт 2026, чт', club: 'Самостоятельная тренировка', dur: '47м' },
-      ],
-    },
-    sep: {
-      title: '1 тренировка',
-      values: [1, 2, 2, 0, 3, 2, 1, 2],
-      diff: 0,
-      total: '52 мин тренировок',
-      list: [{ label: '21 сен 2026, пн', club: 'Самостоятельная тренировка', dur: '52м' }],
-    },
-    aug: {
-      title: '2 тренировки',
-      values: [1, 2, 2, 0, 3, 2, 1, 2],
-      diff: -1,
-      total: '1 ч 55 мин тренировок',
-      list: [
-        { label: '17 авг 2026, пн', club: 'Групповая · Cycle', dur: '50м' },
-        { label: '05 авг 2026, ср', club: 'Самостоятельная тренировка', dur: '1ч 05м' },
-      ],
-    },
+    values: [1, 2, 2, 0, 3, 2, 1, 2],
+    months: [
+      generateWorkouts(2026, 2, 1),
+      generateWorkouts(2026, 3, 2),
+      generateWorkouts(2026, 4, 2),
+      generateWorkouts(2026, 5, 0),
+      generateWorkouts(2026, 6, 3),
+      AUG_WORKOUTS,
+      SEP_WORKOUTS,
+      OCT_WORKOUTS,
+    ],
   },
 };
 
