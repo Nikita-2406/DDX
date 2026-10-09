@@ -11,6 +11,9 @@ type MonthKey = 'oct' | 'sep' | 'aug';
 /** Хронологический порядок для стрелок-переключателей: старые месяцы слева. */
 const MONTH_ORDER: MonthKey[] = ['aug', 'sep', 'oct'];
 
+/** Индексы месяцев на графике (мар=0 … окт=7), доступные для переключения кликом. */
+const MONTH_BY_CHART_INDEX: Record<number, MonthKey> = { 5: 'aug', 6: 'sep', 7: 'oct' };
+
 const MONTH_META: Record<MonthKey, { title: string; compare: string; chartIndex: number }> = {
   oct: { title: 'За октябрь', compare: 'сентябрем', chartIndex: 7 },
   sep: { title: 'За сентябрь', compare: 'августом', chartIndex: 6 },
@@ -75,7 +78,12 @@ export default function VisitsPage() {
           >
             <ChevronLeft size={20} />
           </button>
-          <p className="text-gray-500 text-[15px]">{meta.title}</p>
+          <button
+            onClick={() => setMonthSheet(true)}
+            className="flex-1 text-center text-gray-500 text-[15px] active:opacity-60"
+          >
+            {meta.title}
+          </button>
           <button
             onClick={() => newer && setMonth(newer)}
             disabled={!newer}
@@ -101,7 +109,13 @@ export default function VisitsPage() {
         )}
 
         <div className="mt-6">
-          <VisitsChart labels={VISITS_MONTHS} values={data.values} currentIndex={meta.chartIndex} />
+          <VisitsChart
+            labels={VISITS_MONTHS}
+            values={data.values}
+            currentIndex={meta.chartIndex}
+            selectable={[5, 6, 7]}
+            onSelectMonth={(i) => setMonth(MONTH_BY_CHART_INDEX[i])}
+          />
         </div>
 
         <div className="mt-5">
