@@ -1,0 +1,19 @@
+<!doctype html>
+<html lang="ru">
+  <head>
+    <meta charset="UTF-8" />
+    <title>DDX Fitness</title>
+    <script>
+      // GitHub Pages отдаёт 404.html по любому неизвестному пути.
+      // Приложение использует HashRouter, поэтому возвращаемся в корень сайта.
+      (function () {
+        var p = window.location.pathname;
+        var base = p.endsWith('/') ? p : p.slice(0, p.lastIndexOf('/') + 1);
+        window.location.replace(base + '#/');
+      })();
+    </script>
+  </head>
+  <body>
+    Перенаправление в приложение…
+  </body>
+</html>
