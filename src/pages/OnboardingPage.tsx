@@ -15,7 +15,7 @@ export default function OnboardingPage() {
   };
 
   return (
-    <div className="min-h-full bg-white flex flex-col px-6 pt-[max(env(safe-area-inset-top),16px)] pb-[max(env(safe-area-inset-bottom),24px)]">
+    <div className="min-h-full bg-white flex flex-col px-6 pt-[max(env(safe-area-inset-top),36px)] pb-[max(env(safe-area-inset-bottom),24px)]">
       <div className="flex justify-center mt-12">
         <Logo />
       </div>

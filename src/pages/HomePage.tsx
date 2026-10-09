@@ -50,7 +50,7 @@ export default function HomePage() {
   return (
     <div className="min-h-full bg-white pb-8">
       {/* Шапка */}
-      <header className="flex items-center justify-between px-4 pt-[max(env(safe-area-inset-top),16px)]">
+      <header className="flex items-center justify-between px-4 pt-[max(env(safe-area-inset-top),44px)]">
         <Logo />
         <button
           onClick={() => setSheet('notif')}
@@ -84,12 +84,12 @@ export default function HomePage() {
         ))}
       </div>
 
-      {/* Баннеры */}
-      <div className="flex gap-3 overflow-x-auto no-scrollbar snap-x snap-mandatory px-4 mt-4">
+      {/* Баннеры — scroll-pl-4 не даёт snap-скроллу съедать левый отступ */}
+      <div className="flex gap-3 overflow-x-auto no-scrollbar snap-x snap-mandatory px-4 scroll-pl-4 mt-5">
         {BANNERS.map((b) => (
           <div
             key={b.id}
-            className={`snap-start shrink-0 w-[calc(100%-28px)] h-[150px] rounded-[24px] relative overflow-hidden bg-gradient-to-br ${b.grad} p-5 flex flex-col justify-center`}
+            className={`snap-start shrink-0 w-[calc(100%-36px)] h-[150px] rounded-[24px] relative overflow-hidden bg-gradient-to-br ${b.grad} p-5 flex flex-col justify-center`}
           >
             <BannerRings />
             <h2 className="relative font-display text-[27px] leading-[1.03] text-white uppercase max-w-[70%]">{b.title}</h2>

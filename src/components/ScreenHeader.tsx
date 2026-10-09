@@ -11,7 +11,7 @@ interface Props {
 export function ScreenHeader({ title, backTo = '/profile', action }: Props) {
   const navigate = useNavigate();
   return (
-    <header className="grid grid-cols-[44px_1fr_44px] items-center px-3 pt-[max(env(safe-area-inset-top),14px)] pb-2">
+    <header className="grid grid-cols-[44px_1fr_44px] items-center px-3 pt-[max(env(safe-area-inset-top),36px)] pb-2">
       <button
         onClick={() => navigate(backTo)}
         aria-label="Назад"

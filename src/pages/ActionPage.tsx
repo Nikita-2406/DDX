@@ -14,7 +14,7 @@ export default function ActionPage() {
 
   return (
     <div className="min-h-full bg-white pb-8">
-      <header className="px-4 pt-[max(env(safe-area-inset-top),18px)]">
+      <header className="px-4 pt-[max(env(safe-area-inset-top),36px)]">
         <h1 className="font-display text-[30px] uppercase text-heading">Action</h1>
       </header>
 

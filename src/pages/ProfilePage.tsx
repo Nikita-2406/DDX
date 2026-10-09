@@ -26,7 +26,7 @@ export default function ProfilePage() {
   return (
     <div className="min-h-full bg-surface pb-8">
       {/* Шапка профиля */}
-      <header className="flex items-center gap-3.5 px-4 pt-[max(env(safe-area-inset-top),20px)]">
+      <header className="flex items-center gap-3.5 px-4 pt-[max(env(safe-area-inset-top),44px)]">
         <span className="w-[58px] h-[58px] rounded-full bg-gradient-to-br from-ink to-[#1C6B60] text-white grid place-items-center font-extrabold text-[20px] shrink-0 select-none">
           {initials || <AvatarArt />}
         </span>
