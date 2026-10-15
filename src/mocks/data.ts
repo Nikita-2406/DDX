@@ -277,21 +277,16 @@ const SEP_VISITS: MonthVisits = {
 };
 
 const OCT_VISITS: MonthVisits = {
-  count: 12,
-  total: '14 ч 39 мин',
+  count: 7,
+  total: '8 ч 09 мин',
   list: [
-    { label: '01 окт 2026, чт', club: 'Коньково', dur: '1ч 25м' },
     { label: '02 окт 2026, пт', club: 'Коньково', dur: '1ч 39м' },
     { label: '03 окт 2026, сб', club: 'Коньково', dur: '55м' },
     { label: '05 окт 2026, пн', club: 'Коньково', dur: '1ч 10м' },
     { label: '06 окт 2026, вт', club: 'Коньково', dur: '45м' },
     { label: '08 окт 2026, чт', club: 'Коньково', dur: '1ч 05м' },
-    { label: '09 окт 2026, пт', club: 'Коньково', dur: '1ч 30м' },
     { label: '12 окт 2026, пн', club: 'Коньково', dur: '1ч 15м' },
-    { label: '13 окт 2026, вт', club: 'Коньково', dur: '50м' },
-    { label: '15 окт 2026, чт', club: 'Коньково', dur: '1ч 45м' },
-    { label: '17 окт 2026, сб', club: 'Коньково', dur: '1ч 20м' },
-    { label: '20 окт 2026, пн', club: 'Коньково', dur: '1ч' },
+    { label: '14 окт 2026, ср', club: 'Коньково', dur: '1ч 20м' },
   ],
 };
 
@@ -321,7 +316,7 @@ const OCT_WORKOUTS: MonthVisits = {
 
 export const VISIT_TABS: Record<'visits' | 'workouts', TabHistory> = {
   visits: {
-    values: [11, 12, 10, 12, 11, 10, 11, 12],
+    values: [11, 12, 10, 12, 11, 10, 11, 7],
     months: [
       generateVisits(2026, 2, 11), // март
       generateVisits(2026, 3, 12), // апрель
